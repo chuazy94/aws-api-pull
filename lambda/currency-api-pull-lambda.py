@@ -4,6 +4,7 @@ import boto3
 import json
 import os
 from datetime import datetime
+
 ## import pandas as pd
 
 def get_data(api_url):
@@ -19,6 +20,7 @@ def extract_currency_data(data):
     time_last_update_utc = data['time_last_update_utc']
     time_next_update_utc = data['time_next_update_utc']
     rates = data.get('rates', {})
+    current_pull_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     # Prepare rows for output
     rows = []
@@ -28,7 +30,7 @@ def extract_currency_data(data):
             "rate": rate,
             "last_update": time_last_update_utc,
             "next_update": time_next_update_utc,
-            "api_pull_datetime" : datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            "api_pull_datetime" : current_pull_time
         }
         rows.append(row)
     return rows
