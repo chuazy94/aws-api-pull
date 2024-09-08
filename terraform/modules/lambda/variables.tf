@@ -10,7 +10,7 @@ variable "function_name" {
 variable "lambda_handler" {
   description = "The function handler in the Lambda code"
   type        = string
-  default     = "main.lambda_handler"
+  default     = "lambda_function.lambda_handler"
 }
 
 # Lambda Runtime
@@ -45,7 +45,7 @@ variable "aws_region" {
 }
 
 variable "role_arn"{
-      description = "The ARN of the IAM role that Lambda assumes when it executes the function"
+    description = "The ARN of the IAM role that Lambda assumes when it executes the function"
   type        = string
 }
 
@@ -53,4 +53,14 @@ variable "function_layers" {
   description = "List of Lambda layer ARNs to attach to the function"
   type        = list(string)
   default     = []
+}
+
+variable  "lambda_timeout"{
+  description = "Lambda timeout"
+  type        = string
+}
+
+variable "lambda_memory_size"{
+  description = "Lambda memory size"
+  type        = string
 }

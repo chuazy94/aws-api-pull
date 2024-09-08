@@ -17,3 +17,7 @@ variable "invoke_crawler_policy_name" {
   description = "The name of the Invoke Crawler policy"
   type        = string
 }
+
+variable "currency_glue_s3_policy_name"{
+    description = "The name of the s3 policy for university glue crawler"
+}

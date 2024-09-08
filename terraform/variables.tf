@@ -50,6 +50,48 @@ variable "university_crawler" {
 variable "currency_crawler" {
   description = "The crawler name for currency tables"
   type        = string
-  default     = "api-currency-data-crawler"
+  default     = "currency-rate-crawler"
 }
 
+variable "pull_lambda_memory_size"{
+  description = "Memory size of the pull lambda functions"
+  type        = string
+  default     = 128
+}
+
+variable "invoke_lambda_memory_size"{
+  description = "Memory size of the pull lambda functions"
+  type        = string
+  default     = 128
+}
+
+variable "pull_lambda_timeout" {
+  description = "Timeout of the pull lambda functions"
+  type        = string
+  default     = 60
+}
+
+
+variable "invoke_lambda_timeout" {
+  description = "Timeout of the invoke glue lambda functions"
+  type        = string
+  default     = 360
+}
+
+variable "athena_database_name" {
+  description = "Database containing glue tables"
+  type = string
+  default = "api_pull_db"
+}
+
+variable "crawler_currency_s3_path" {
+  description = "s3 path for crawler to crawl through for currency"
+  type = string
+  default = "s3://api-currency-rate-data-bucket/currency_data/"
+}
+
+variable "crawler_university_s3_path" {
+  description = "s3 path for crawler to crawl through for university"
+  type = string
+  default = "s3://api-university-bucket/unversity_data/"
+}
