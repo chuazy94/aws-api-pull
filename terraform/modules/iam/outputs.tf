@@ -7,3 +7,8 @@ output "invoke_crawler_role_arn" {
   description = "The ARN of the Invoke Crawler IAM role"
   value       = aws_iam_role.invoke_crawler_role.arn
 }
+
+output "glue_crawler_role_arn" {
+  description = "The ARN of the glue crawler IAM role"
+  value = aws_iam_role.crawler_glue_role.arn
+}

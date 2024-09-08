@@ -10,6 +10,8 @@ resource "aws_lambda_function" "lambda" {
   source_code_hash = filebase64sha256(var.zip_file) # Ensures Lambda redeploys if code changes
   runtime          = var.lambda_runtime                        # Runtime (e.g. python3.9)
   role             = var.role_arn             # IAM Role for execution
+  timeout          = var.lambda_timeout
+  memory_size      = var.lambda_memory_size
 
   # Adding environment variables for the Lambda function
   environment {
