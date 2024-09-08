@@ -7,7 +7,7 @@ on:
 
 jobs:
   terraform:
-    name: Deploy Infrastructure
+    name: Terraform plan Infrastructure
     runs-on: ubuntu-latest
     env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
