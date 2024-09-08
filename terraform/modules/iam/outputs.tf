@@ -12,3 +12,8 @@ output "glue_crawler_role_arn" {
   description = "The ARN of the glue crawler IAM role"
   value = aws_iam_role.crawler_glue_role.arn
 }
+
+output "step_function_role_arn" {
+  description = "The ARN of the glue crawler IAM role"
+  value = aws_iam_role.step_function_role.arn
+}

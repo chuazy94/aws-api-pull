@@ -1,0 +1,156 @@
+{
+    "Comment": "An example of using Athena to query logs, get query results and send results through notification.",
+    "StartAt": "Parallel",
+    "States": {
+      "Parallel": {
+        "Type": "Parallel",
+        "Branches": [
+          {
+            "StartAt": "Pull Currency data API",
+            "States": {
+              "Pull Currency data API": {
+                "Resource": "arn:aws:states:::lambda:invoke",
+                "Parameters": {
+                  "FunctionName": "arn:aws:lambda:eu-west-2:128554234427:function:currency_api_pull_lambda:$LATEST"
+                },
+                "Type": "Task",
+                "Next": "Run Currency Glue API"
+              },
+              "Run Currency Glue API": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::lambda:invoke",
+                "OutputPath": "$.Payload",
+                "Parameters": {
+                  "Payload.$": "$",
+                  "FunctionName": "arn:aws:lambda:eu-west-2:128554234427:function:invoke_currency_glue_lambda:$LATEST"
+                },
+                "Retry": [
+                  {
+                    "ErrorEquals": [
+                      "Lambda.ServiceException",
+                      "Lambda.AWSLambdaException",
+                      "Lambda.SdkClientException",
+                      "Lambda.TooManyRequestsException"
+                    ],
+                    "IntervalSeconds": 1,
+                    "MaxAttempts": 3,
+                    "BackoffRate": 2
+                  }
+                ],
+                "Next": "Athena Query Drop Currency stage table"
+              },
+              "Athena Query Drop Currency stage table": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::athena:startQueryExecution",
+                "Parameters": {
+                  "QueryString": "DROP TABLE IF EXISTS `api_pull_db.staging_currency_data`",
+                  "WorkGroup": "primary",
+                  "ResultConfiguration": {
+                    "OutputLocation": "s3://s3-athena-queries-bucket"
+                  }
+                },
+                "Next": "Athena Run Staging build Currency"
+              },
+              "Athena Run Staging build Currency": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+                "Parameters": {
+                  "QueryString": "CREATE TABLE api_pull_db.staging_currency_data AS SELECT currency, rate, last_update, next_update, api_pull_datetime FROM api_pull_db.raw_currency_data WHERE api_pull_datetime= (select MAX(api_pull_datetime) from api_pull_db.raw_currency_data)",
+                  "WorkGroup": "primary",
+                  "ResultConfiguration": {
+                    "OutputLocation": "s3://s3-athena-queries-bucket"
+                  }
+                },
+                "End": true
+              }
+            }
+          },
+          {
+            "StartAt": "Pull University data API",
+            "States": {
+              "Pull University data API": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::lambda:invoke",
+                "OutputPath": "$.Payload",
+                "Parameters": {
+                  "Payload.$": "$",
+                  "FunctionName": "arn:aws:lambda:eu-west-2:128554234427:function:university_api_pull_lambda:$LATEST"
+                },
+                "Retry": [
+                  {
+                    "ErrorEquals": [
+                      "Lambda.ServiceException",
+                      "Lambda.AWSLambdaException",
+                      "Lambda.SdkClientException",
+                      "Lambda.TooManyRequestsException"
+                    ],
+                    "IntervalSeconds": 1,
+                    "MaxAttempts": 3,
+                    "BackoffRate": 2
+                  }
+                ],
+                "Next": "Run University API Glue crawler"
+              },
+              "Run University API Glue crawler": {
+                "Resource": "arn:aws:states:::lambda:invoke",
+                "Parameters": {
+                  "FunctionName": "arn:aws:lambda:eu-west-2:128554234427:function:invoke_university_glue_lambda:$LATEST"
+                },
+                "Type": "Task",
+                "Next": "Athena Query Drop University Stage table"
+              },
+              "Athena Query Drop University Stage table": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+                "Parameters": {
+                  "QueryString": "DROP TABLE IF EXISTS `api_pull_db.staging_unversity_data`",
+                  "WorkGroup": "primary",
+                  "ResultConfiguration": {
+                    "OutputLocation": "s3://s3-athena-queries-bucket"
+                  }
+                },
+                "Next": "Athena Run Staging build University"
+              },
+              "Athena Run Staging build University": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+                "Parameters": {
+                  "QueryString": "CREATE TABLE api_pull_db.staging_unversity_data AS SELECT name as university_name , 'state-province' as state_province, country, annual_tuition_fee, api_pull_datetime FROM api_pull_db.raw_unversity_data WHERE api_pull_datetime= (select MAX(api_pull_datetime) from api_pull_db.raw_unversity_data)",
+                  "WorkGroup": "primary",
+                  "ResultConfiguration": {
+                    "OutputLocation": "s3://s3-athena-queries-bucket"
+                  }
+                },
+                "End": true
+              }
+            }
+          }
+        ],
+        "Next": "Athena Drop DIM table"
+      },
+      "Athena Drop DIM table": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+        "Parameters": {
+          "QueryString": "DROP TABLE IF EXISTS `api_pull_db.dim_unversity_fees_usd`",
+          "WorkGroup": "primary",
+          "ResultConfiguration": {
+            "OutputLocation": "s3://s3-athena-queries-bucket"
+          }
+        },
+        "Next": "Athena Create DIM table"
+      },
+      "Athena Create DIM table": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+        "Parameters": {
+          "QueryString": "CREATE TABLE api_pull_db.dim_unversity_fees_usd AS SELECT a.university_name ,a.state_province , a.country , a.annual_tuition_fee , a.annual_tuition_fee * c.rate as annual_tuition_fee_in_usd , COALESCE(a.api_pull_datetime, c.api_pull_datetime) as api_pull_datetime FROM api_pull_db.staging_unversity_data a LEFT JOIN api_pull_db.raw_currency_country_mapping b on upper(a.country) = b.entity INNER JOIN api_pull_db.staging_currency_data c on b.alphabeticcode = c.currency AND b.withdrawaldate = ''",
+          "WorkGroup": "primary",
+          "ResultConfiguration": {
+            "OutputLocation": "s3://s3-athena-queries-bucket"
+          }
+        },
+        "End": true
+      }
+    }
+  }

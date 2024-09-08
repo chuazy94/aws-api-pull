@@ -37,6 +37,7 @@ module "iam" {
   api_pull_policy_name          = "api_pull_policy"
   invoke_crawler_policy_name    = "invoke_crawler_policy"
   currency_glue_s3_policy_name  = "s3_glue_policy"
+  step_function_role_name = "step_function_policy"
 }
 
 module "lambda_layer" {
@@ -121,4 +122,11 @@ module "university_glue_crawler"{
   glue_role_arn = module.iam.glue_crawler_role_arn
   glue_table_prefix = "raw_"
   crawler_s3_path = var.crawler_university_s3_path
+}
+
+
+module "step_function" {
+  source                     = "./modules/step_functions"
+  step_function_name          = "API_University_Currency_Workflow"
+  step_function_role_arn = module.iam.step_function_role_arn
 }

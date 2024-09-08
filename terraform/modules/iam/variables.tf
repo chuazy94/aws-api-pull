@@ -21,3 +21,8 @@ variable "invoke_crawler_policy_name" {
 variable "currency_glue_s3_policy_name"{
     description = "The name of the s3 policy for university glue crawler"
 }
+
+variable "step_function_role_name" {
+  description = "The name of the IAM role for the Step Function"
+  type        = string
+}
