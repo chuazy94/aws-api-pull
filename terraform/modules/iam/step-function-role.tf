@@ -24,6 +24,11 @@ resource "aws_iam_role_policy_attachment" "lambda_role" {
   policy_arn  = "arn:aws:iam::aws:policy/service-role/AWSLambdaRole"
 }
 
+resource "aws_iam_role_policy_attachment" "cloudwatch_logs_policy" {
+  role       = aws_iam_role.step_function_role.name
+  policy_arn  = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+}
+
 resource "aws_iam_policy" "step_function_glue_athena_policy" {
   name = "step_function_glue_athena_policy"
   
