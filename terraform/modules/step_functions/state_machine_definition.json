@@ -115,7 +115,7 @@
                 "Type": "Task",
                 "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
                 "Parameters": {
-                  "QueryString": "CREATE TABLE api_pull_db.staging_unversity_data AS SELECT name as university_name , state_province, country, annual_tuition_fee, api_pull_datetime FROM api_pull_db.raw_unversity_data WHERE api_pull_datetime= (select MAX(api_pull_datetime) from api_pull_db.raw_unversity_data)",
+                  "QueryString": "CREATE TABLE api_pull_db.staging_unversity_data AS SELECT name as university_name ,\"state-province\" as state_province, country, annual_tuition_fee, api_pull_datetime FROM api_pull_db.raw_unversity_data WHERE api_pull_datetime= (select MAX(api_pull_datetime) from api_pull_db.raw_unversity_data)",
                   "WorkGroup": "primary",
                   "ResultConfiguration": {
                     "OutputLocation": "s3://s3-athena-queries-bucket"
