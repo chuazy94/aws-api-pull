@@ -4,11 +4,8 @@ import time
 import os
 
 def lambda_handler(event, context):
-    # Initialize Glue client
     glue_client = boto3.client('glue')
 
-    
-    # Specify the crawler name
     crawler_name = os.environ['crawler_name']
     
     max_retries = 10

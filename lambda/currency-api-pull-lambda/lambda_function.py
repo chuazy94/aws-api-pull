@@ -43,7 +43,6 @@ def lambda_handler(event, context):
     extracted_data = extract_currency_data(data)
     json_lines = "\n".join(json.dumps(row) for row in extracted_data)
     
-    #data_dumps = json.dumps(extracted_data)
     s3_client = boto3.client('s3')
     s3_bucket = os.environ['bucket_destination']
     s3_key = f"currency_data/currency_data_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.json"

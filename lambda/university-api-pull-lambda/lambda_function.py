@@ -35,7 +35,6 @@ def lambda_handler(event, context):
     #extracted_data = extract_currency_data(data)
     json_lines = "\n".join(json.dumps(item) for item in uni_data)
 
-    data_dumps = json.dumps(data)
     s3_client = boto3.client('s3')
     s3_bucket = os.environ['bucket_destination']
     s3_key = f"unversity_data/unversity_data_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.json"
